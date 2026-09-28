@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, ArrowRight, Compass, ShieldAlert, Sparkles, X, Check, FileSearch } from 'lucide-react';
+import { Globe, ArrowRight, Compass, ShieldAlert, Sparkles, X, Check } from 'lucide-react';
 
 export default function HeroSection({
   targetUrl,
@@ -8,15 +8,14 @@ export default function HeroSection({
   setDepthLevel,
   onStartPipeline,
   isLoading,
-  currentStatus,
-  onLoadPreset
+  currentStatus
 }) {
   const [urlError, setUrlError] = useState('');
 
   const handleStart = (e) => {
     e.preventDefault();
     if (!targetUrl.trim()) {
-      setUrlError('Please enter a valid website URL or select a preset.');
+      setUrlError('Please enter a valid website URL to crawl.');
       return;
     }
     setUrlError('');
@@ -138,35 +137,6 @@ export default function HeroSection({
               <span>{urlError}</span>
             </div>
           )}
-
-          {/* Quick Preset Chips */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="text-slate-500 flex items-center gap-1 font-medium mr-1">
-              <FileSearch className="w-3.5 h-3.5 text-slate-500" />
-              Quick Presets:
-            </span>
-            <button
-              type="button"
-              onClick={() => onLoadPreset('futurebright-courses')}
-              className="px-3 py-1 rounded-full bg-green-50 hover:bg-green-100 border border-green-300 text-green-800 font-bold transition-colors shadow-xs"
-            >
-              🎯 Future Bright Infotech (Button PDFs)
-            </button>
-            <button
-              type="button"
-              onClick={() => onLoadPreset('enterprise-demo')}
-              className="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-medium transition-colors"
-            >
-              ⚡ Instant Demo (3 Enterprise Reports)
-            </button>
-            <button
-              type="button"
-              onClick={() => onLoadPreset('arxiv-sample')}
-              className="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-medium transition-colors"
-            >
-              📄 ArXiv Preprints
-            </button>
-          </div>
 
         </form>
 

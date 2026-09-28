@@ -26,7 +26,6 @@ Given any target website URL, the application autonomously scans the entire site
 - [Environment Variables & AI Models](#-environment-variables--ai-models)
 - [Interactive Page Studio & Modifier Suite](#-interactive-page-studio--modifier-suite)
 - [API Endpoints Reference](#-api-endpoints-reference)
-- [Presets & Demo Testing](#-presets--demo-testing)
 - [License](#-license)
 
 ---
@@ -120,7 +119,7 @@ AI_DRIVEN_PDF_CRAWLER_SYNTHESIZER/
 │   ├── public/              # Static assets and favicon
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── HeroSection.jsx           # URL input, single/entire site toggle, presets
+│   │   │   ├── HeroSection.jsx           # URL input, single/entire site toggle, crawl CTA
 │   │   │   ├── MasterDownloadHub.jsx     # Master PDF download CTA, ZIP export, studio button
 │   │   │   ├── Navbar.jsx                # Sticky navbar with settings & RAG toggles
 │   │   │   ├── PDFModal.jsx              # Document viewer modal
@@ -261,15 +260,6 @@ Once a crawl and merge job completes, click **"Organize & Modify Pages"** on the
 | `POST` | `/api/jobs/{job_id}/update-metadata` | Edit embedded document metadata |
 | `POST` | `/api/jobs/{job_id}/extract-pages` | Extract and download specific page sub-ranges |
 | `POST` | `/api/rag/{job_id}/chat` | Query RAG assistant with grounded citations |
-
----
-
-## 🧪 Presets & Demo Testing
-
-Want to test immediately without crawling an external website? Click any of the quick-action pills in the Hero section:
-1. **Instant Demo (3 Enterprise Reports)**: Uses pre-bundled offline PDFs for instant processing.
-2. **ArXiv CS.AI Preprints**: Demonstrates academic multi-paper discovery and merging.
-3. **W3C Technical Standards**: Tests web specification document consolidation.
 
 ---
 

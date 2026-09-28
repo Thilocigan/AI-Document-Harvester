@@ -30,7 +30,6 @@ export default function App() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isReMerging, setIsReMerging] = useState(false);
-  const [presets, setPresets] = useState([]);
 
   // Modals & Panels
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -44,14 +43,6 @@ export default function App() {
   const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_key') || '');
 
   const eventSourceRef = useRef(null);
-
-  // Fetch presets on mount
-  useEffect(() => {
-    fetch('/api/presets')
-      .then((res) => res.json())
-      .then((data) => setPresets(data))
-      .catch(() => {});
-  }, []);
 
   // Cleanup SSE on unmount
   useEffect(() => {
@@ -213,23 +204,6 @@ export default function App() {
     }
   };
 
-  const handleSelectPreset = (preset) => {
-    setTargetUrl(preset.url);
-    setDepthLevel(preset.depth || 'single');
-    handleStartPipeline(preset.url, preset.is_demo);
-  };
-
-  const handleLoadPresetId = (presetId) => {
-    const found = presets.find((p) => p.id === presetId);
-    if (found) {
-      handleSelectPreset(found);
-    } else if (presetId === 'enterprise-demo') {
-      const demoUrl = 'https://demo.enterprise-intelligence.org';
-      setTargetUrl(demoUrl);
-      handleStartPipeline(demoUrl, true);
-    }
-  };
-
   const handleTogglePDF = async (pdfId, selected) => {
     if (!jobId) return;
 
@@ -310,8 +284,6 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onToggleChat={() => setIsChatOpen(!isChatOpen)}
         isChatOpen={isChatOpen}
-        onSelectPreset={handleSelectPreset}
-        presets={presets}
       />
 
       {/* Main Content Area */}
@@ -326,7 +298,6 @@ export default function App() {
           onStartPipeline={() => handleStartPipeline()}
           isLoading={isLoading}
           currentStatus={jobData.status}
-          onLoadPreset={handleLoadPresetId}
         />
 
         {/* Dynamic Progress Section */}
