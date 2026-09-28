@@ -5,15 +5,26 @@ This guide provides step-by-step instructions for moving, installing, and runnin
 
 ---
 
-## 📦 Step 1: Transferring the Project Files
+## 📦 Step 1: Download from GitHub to the New Computer
 
-### What to Copy to the New Computer:
-Copy the entire `AI_DRIVEN_PDF_CRAWLER_SYNTHESIZER` folder to your new computer (via USB drive, ZIP archive, or Git).
+Choose whichever method is easier for you on the new computer:
 
-> [!IMPORTANT]
-> **DO NOT** copy or transfer `backend\venv` or `frontend\node_modules` if you can avoid it!
-> - Virtual environments and node packages contain machine-specific paths and binaries.
-> - If they were copied over, it is safest to delete `backend\venv` and `frontend\node_modules` on the new computer so they install freshly.
+### Option A: Direct Download as ZIP (Easiest — No Git required)
+1. On the new computer, open your browser and go to your GitHub repository:
+   `https://github.com/YOUR-USERNAME/AI_DRIVEN_PDF_CRAWLER_SYNTHESIZER`
+2. Click the green **`<> Code`** button at the top right of the file list.
+3. Click **"Download ZIP"**.
+4. Once downloaded, right-click the `.zip` file, select **"Extract All..."**, and extract it to your preferred location (e.g. `C:\Projects\` or `D:\Projects\`).
+
+---
+
+### Option B: Clone using Git (If Git is installed)
+Open a terminal (PowerShell, Command Prompt, or Terminal) and run:
+```bash
+git clone https://github.com/YOUR-USERNAME/AI_DRIVEN_PDF_CRAWLER_SYNTHESIZER.git
+cd AI_DRIVEN_PDF_CRAWLER_SYNTHESIZER
+```
+*(Note: Because `.gitignore` cleanly excluded `venv` and `node_modules`, the download from GitHub is tiny and fast! We will install them freshly in Step 3).*
 
 ---
 
