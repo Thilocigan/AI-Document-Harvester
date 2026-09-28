@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  Download, FileDown, CheckCircle, ShieldCheck, Sparkles, 
-  BookCheck, FileText, Layers, SlidersHorizontal, Settings2,
-  Archive, Scissors, Check, X
+  Download, CheckCircle, ShieldCheck, Sparkles, 
+  Layers, SlidersHorizontal, Archive, Scissors, X 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -36,14 +35,6 @@ export default function MasterDownloadHub({
 
   const handleDownloadZIP = () => {
     window.open(`/api/download/${jobId}/zip`, '_blank');
-  };
-
-  const handleDownloadSummaryPDF = () => {
-    window.open(`/api/download/${jobId}/summary-pdf`, '_blank');
-  };
-
-  const handleDownloadSummaryMD = () => {
-    window.open(`/api/download/${jobId}/summary`, '_blank');
   };
 
   const handleExtractRange = async (e) => {
@@ -197,28 +188,6 @@ export default function MasterDownloadHub({
             >
               <Archive className="w-4 h-4 text-amber-600" />
               <span>Download ZIP Bundle</span>
-            </button>
-
-            {/* Standalone Executive Summary PDF */}
-            <button
-              type="button"
-              onClick={handleDownloadSummaryPDF}
-              className="w-full sm:w-auto px-4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-              title="Download Standalone AI Executive Report"
-            >
-              <BookCheck className="w-4 h-4 text-green-600" />
-              <span>AI Summary (PDF)</span>
-            </button>
-
-            {/* Markdown Summary Download */}
-            <button
-              type="button"
-              onClick={handleDownloadSummaryMD}
-              className="w-full sm:w-auto px-4 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-              title="Export Markdown Document"
-            >
-              <FileDown className="w-4 h-4 text-slate-600" />
-              <span>Report (.md)</span>
             </button>
           </div>
 

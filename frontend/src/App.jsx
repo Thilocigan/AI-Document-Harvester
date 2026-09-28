@@ -3,7 +3,6 @@ import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import ProgressBar from './components/ProgressBar';
 import PDFPreviewGrid from './components/PDFPreviewGrid';
-import SynthesisSection from './components/SynthesisSection';
 import MasterDownloadHub from './components/MasterDownloadHub';
 import RAGChatSidebar from './components/RAGChatSidebar';
 import PDFModal from './components/PDFModal';
@@ -326,11 +325,6 @@ export default function App() {
           isPipelineComplete={isPipelineComplete}
           includeCover={includeCover}
           setIncludeCover={setIncludeCover}
-        />
-
-        {/* AI Synthesis & Deduplication Presentation */}
-        <SynthesisSection
-          synthesizedAnalysis={jobData.synthesized_analysis}
         />
 
         {/* Master PDF Download Hub */}
