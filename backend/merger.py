@@ -1,7 +1,9 @@
 import os
+import re
 import json
+import uuid
 import shutil
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import pymupdf  # PyMuPDF
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -9,6 +11,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, PageBreak
 from reportlab.pdfgen import canvas
 from jobs import DiscoveredPDF, SynthesizedAnalysis, job_manager
+from processor import document_processor
 
 class NumberedCanvas(canvas.Canvas):
     """
@@ -553,6 +556,130 @@ class MasterPDFMerger:
             }
         except Exception as e:
             job_manager.add_log(job_id, "ERROR", f"Failed to apply page edits: {str(e)}")
+            return None
+
+    def append_local_pdfs(self, job_id: str, uploaded_files: List[Tuple[str, bytes]]) -> Optional[Dict[str, Any]]:
+        job = job_manager.get_job(job_id)
+        if not job:
+            return None
+
+        job_dir = document_processor.get_job_dir(job_id)
+        user_uploads_dir = os.path.join(job_dir, "user_uploads")
+        os.makedirs(user_uploads_dir, exist_ok=True)
+
+        manifest_file = os.path.join(job_dir, "page_manifest.json")
+        manifest_map = {}
+        if os.path.exists(manifest_file):
+            try:
+                with open(manifest_file, "r") as f:
+                    manifest_map = json.load(f)
+            except Exception:
+                pass
+
+        master_path = job.master_pdf_path
+        if not master_path or not os.path.exists(master_path):
+            master_path = os.path.join(job_dir, f"Merged_Complete_PDFs_{job_id}.pdf")
+            master_doc = pymupdf.open()
+        else:
+            try:
+                master_doc = pymupdf.open(master_path)
+            except Exception:
+                master_doc = pymupdf.open()
+
+        current_master_page = len(master_doc)
+        added_files_info = []
+
+        try:
+            for orig_filename, file_bytes in uploaded_files:
+                clean_name = re.sub(r'[^a-zA-Z0-9_\-\. ]', '_', orig_filename).strip()
+                if not clean_name.lower().endswith(".pdf"):
+                    clean_name += ".pdf"
+
+                dest_file_path = os.path.join(user_uploads_dir, clean_name)
+                base, ext = os.path.splitext(clean_name)
+                counter = 1
+                while os.path.exists(dest_file_path):
+                    clean_name = f"{base}_{counter}{ext}"
+                    dest_file_path = os.path.join(user_uploads_dir, clean_name)
+                    counter += 1
+
+                with open(dest_file_path, "wb") as f:
+                    f.write(file_bytes)
+
+                try:
+                    src_doc = pymupdf.open(dest_file_path)
+                    doc_pages = len(src_doc)
+                    if doc_pages == 0:
+                        src_doc.close()
+                        continue
+
+                    display_source = f"{clean_name} (Local Upload)"
+                    for sp in range(doc_pages):
+                        manifest_map[str(current_master_page)] = {
+                            "source_filename": display_source,
+                            "source_page": sp + 1
+                        }
+                        current_master_page += 1
+
+                    master_doc.insert_pdf(src_doc)
+                    src_doc.close()
+
+                    discovered = DiscoveredPDF(
+                        id=str(uuid.uuid4())[:8],
+                        url=f"local://{clean_name}",
+                        filename=clean_name,
+                        file_size_bytes=len(file_bytes),
+                        page_count=doc_pages,
+                        local_path=dest_file_path,
+                        selected=True,
+                        status="uploaded",
+                        summary_snippet=f"Local PDF uploaded from PC ({doc_pages} pages)"
+                    )
+                    job.discovered_pdfs.append(discovered)
+
+                    added_files_info.append({
+                        "filename": clean_name,
+                        "pages": doc_pages,
+                        "size": len(file_bytes)
+                    })
+                    job_manager.add_log(job_id, "SUCCESS", f"Added local PDF: '{clean_name}' ({doc_pages} pages)")
+                except Exception as ex:
+                    job_manager.add_log(job_id, "WARNING", f"Could not process uploaded file '{clean_name}': {str(ex)}")
+
+            if not added_files_info:
+                master_doc.close()
+                return None
+
+            temp_path = os.path.join(job_dir, f"temp_master_{job_id}.pdf")
+            master_doc.save(temp_path, garbage=4, deflate=True, clean=True)
+            total_pages = len(master_doc)
+            master_doc.close()
+
+            if os.path.exists(master_path):
+                os.remove(master_path)
+            os.rename(temp_path, master_path)
+
+            thumb_dir = os.path.join(job_dir, "thumbnails")
+            if os.path.exists(thumb_dir):
+                shutil.rmtree(thumb_dir, ignore_errors=True)
+
+            with open(manifest_file, "w") as f:
+                json.dump(manifest_map, f, indent=2)
+
+            file_size = os.path.getsize(master_path)
+            job.master_pdf_path = master_path
+            job.master_pdf_filename = f"Merged_Complete_PDFs_{job_id}.pdf"
+            job.master_pdf_size = file_size
+            job.master_page_count = total_pages
+
+            return {
+                "status": "success",
+                "total_pages": total_pages,
+                "file_size": file_size,
+                "added_files": added_files_info
+            }
+        except Exception as e:
+            job_manager.add_log(job_id, "ERROR", f"Failed to append local PDFs: {str(e)}")
             return None
 
     def extract_page_range(self, job_id: str, range_expression: str) -> Optional[str]:

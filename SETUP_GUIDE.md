@@ -170,7 +170,15 @@ If you want to start the backend and frontend separately:
 
 The application has a **built-in Zero-Dependency Intelligent NLP Engine** enabled by default, meaning:
 - **No API keys or credit cards are needed** to crawl, extract text, deduplicate, merge PDFs, or use the Page Studio!
-- If you wish to use OpenAI (GPT-4o) or Google Gemini Flash for AI synthesis, simply click the **Settings (⚙️)** icon in the top navigation bar and paste your key. Keys are safely stored in your browser's `localStorage`.
+---
+
+## 📄 Step 6: Combining Your Own Local PDF Files from PC
+
+You can combine existing PDF files from your computer storage with web-crawled documents without any extra configuration:
+1. Click **"🛠️ Reorder & Organize Pages"** or **"➕ Add Local PDF from PC"** on the Master Download Hub.
+2. In the Page Studio, click the green **"➕ Add PDF from PC"** button or drag-and-drop `.pdf` files directly onto the dropzone.
+3. The uploaded files are immediately parsed and appended, allowing you to drag-and-drop rearrange their pages, delete unwanted pages, rotate them, or apply watermarks and page numbering.
+4. Click **"Save & Update Merged PDF"** to produce your final unified document.
 
 ---
 

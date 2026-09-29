@@ -47,6 +47,7 @@ Given any target website URL, the application autonomously scans the entire site
    - Tri-mode AI engine: **Google Gemini 2.5 Flash**, **OpenAI GPT-4o-mini**, or **100% Offline Local TF-IDF & Heuristic NLP Synthesizer** (runs anywhere with zero API keys required).
 
 4. **Interactive Merged PDF Page Studio & Modifier**:
+   - **Add & Combine Local PC PDFs**: Upload PDF documents directly from your computer storage (via button or drag-and-drop into the studio) to seamlessly merge, reorder, and combine your own files with crawled documents.
    - **Fluid Drag-and-Drop Reordering**: Change page sequence across the master PDF effortlessly.
    - **Page Rotation & Deletion**: Rotate individual or batch-selected pages (90°/180°/270°) and remove unwanted pages.
    - **Running Page Numbers**: Stamp custom patterns (e.g., `Page {page} of {total}`) across headers or footers with position and color controls.
@@ -233,6 +234,7 @@ FRONTEND_PORT=5173
 
 Once a crawl and merge job completes, click **"Organize & Modify Pages"** on the Master Download Hub to access the Visual Studio:
 
+- **Add & Combine Local PC PDFs**: Click *"Add PDF from PC"* or drag-and-drop local `.pdf` files directly onto the studio to combine them with web documents.
 - **Drag-and-Drop Reordering**: Drag page thumbnails to rearrange document structure.
 - **Batch Actions**: Select multiple pages using checkboxes or range syntax (`1-5, 8, 12`) to delete or rotate in bulk.
 - **Dynamic Page Numbering**: Choose position (`Bottom Center`, `Top Right`, etc.), custom format patterns, font size, and color.
@@ -253,13 +255,14 @@ Once a crawl and merge job completes, click **"Organize & Modify Pages"** on the
 | `GET` | `/api/jobs/{job_id}/master-pdf` | Download the compiled unified master PDF |
 | `GET` | `/api/jobs/{job_id}/download-zip` | Download ZIP archive of all original PDFs |
 | `GET` | `/api/jobs/{job_id}/pages` | Get metadata and thumbnails of all pages in the master PDF |
-| `POST` | `/api/jobs/{job_id}/reorder-pages` | Apply custom page sequence or deletions to master PDF |
+| `POST` | `/api/jobs/{job_id}/upload-local-pdf` | Upload and combine local PDF files from computer into master document |
+| `POST` | `/api/jobs/{job_id}/edit-pages` | Apply custom page sequence, rotations, or deletions to master PDF |
 | `POST` | `/api/jobs/{job_id}/apply-page-numbers` | Stamp running headers/footers with page numbering |
 | `POST` | `/api/jobs/{job_id}/apply-watermark` | Stamp custom text watermark across pages |
 | `POST` | `/api/jobs/{job_id}/optimize-pdf` | Losslessly deflate and optimize master PDF file size |
 | `POST` | `/api/jobs/{job_id}/update-metadata` | Edit embedded document metadata |
-| `POST` | `/api/jobs/{job_id}/extract-pages` | Extract and download specific page sub-ranges |
-| `POST` | `/api/rag/{job_id}/chat` | Query RAG assistant with grounded citations |
+| `POST` | `/api/jobs/{job_id}/extract-range` | Extract and download specific page sub-ranges |
+| `POST` | `/api/chat` | Query RAG assistant with grounded citations |
 
 ---
 

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env if present
 load_dotenv()
 from typing import Optional, List
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Query
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from sse_starlette.sse import EventSourceResponse
@@ -276,6 +276,39 @@ async def edit_master_pages(job_id: str, req: PageEditsRequest):
         "total_pages": result["total_pages"],
         "file_size": result["file_size"],
         "download_url": f"/api/download/{job_id}"
+    }
+
+@app.post("/api/jobs/{job_id}/upload-local-pdf")
+async def upload_local_pdf(job_id: str, files: List[UploadFile] = File(...)):
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    if not files:
+        raise HTTPException(status_code=400, detail="No files selected")
+
+    uploaded_data = []
+    for f in files:
+        if not f.filename.lower().endswith(".pdf"):
+            continue
+        content = await f.read()
+        if len(content) > 0:
+            uploaded_data.append((f.filename, content))
+
+    if not uploaded_data:
+        raise HTTPException(status_code=400, detail="No valid PDF files provided. Please upload valid .pdf files.")
+
+    result = master_merger.append_local_pdfs(job_id, uploaded_data)
+    if not result:
+        raise HTTPException(status_code=500, detail="Failed to append uploaded PDF files")
+
+    return {
+        "status": "success",
+        "message": f"Successfully combined {len(result['added_files'])} local PDF(s) into Master Document",
+        "total_pages": result["total_pages"],
+        "file_size": result["file_size"],
+        "added_files": result["added_files"],
+        "pages": master_merger.get_master_pages(job_id)
     }
 
 class PageNumberRequest(BaseModel):

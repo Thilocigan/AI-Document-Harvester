@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Download, CheckCircle, ShieldCheck, Sparkles, 
-  Layers, SlidersHorizontal, Archive, Scissors, X 
+  Layers, SlidersHorizontal, Archive, Scissors, X, FolderUp 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -118,6 +118,15 @@ export default function MasterDownloadHub({
             >
               <SlidersHorizontal className="w-4 h-4 text-green-600 group-hover:rotate-90 transition-transform duration-300" />
               <span>🛠️ Reorder &amp; Organize Pages</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onOpenOrganizer && onOpenOrganizer('layout')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-green-50 border border-green-500/50 hover:border-green-600 text-green-800 font-bold text-xs tracking-wide transition-all shadow-sm hover:shadow-green-500/20"
+            >
+              <FolderUp className="w-4 h-4 text-green-600" />
+              <span>➕ Add Local PDF from PC</span>
             </button>
 
             <button

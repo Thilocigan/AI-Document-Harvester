@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Trash2, RotateCw, ArrowLeft, ArrowRight, RotateCcw, 
   Check, Undo2, Filter, Layers, AlertTriangle, FileText, Sparkles, RefreshCw,
   ZoomIn, GripVertical, CheckSquare, Square, Hash, Stamp, SlidersHorizontal,
-  Maximize2, ChevronLeft, ChevronRight, Minimize2, Palette, ShieldCheck, Download
+  Maximize2, ChevronLeft, ChevronRight, Minimize2, Palette, ShieldCheck, Download,
+  PlusCircle, Upload, FolderUp, FilePlus
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -23,6 +24,11 @@ export default function PDFPageOrganizerModal({
   const [isSaving, setIsSaving] = useState(false);
   const [deletedPagesHistory, setDeletedPagesHistory] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // Local PDF Upload State
+  const fileInputRef = useRef(null);
+  const [isUploadingLocal, setIsUploadingLocal] = useState(false);
+  const [isDragOverDropzone, setIsDragOverDropzone] = useState(false);
 
   // Drag and drop state
   const [draggedIndex, setDraggedIndex] = useState(null);
@@ -367,6 +373,70 @@ export default function PDFPageOrganizerModal({
     }
   };
 
+  // PDF Features: Upload & Combine Local PDF Files from PC
+  const handleUploadLocalPDFs = async (files) => {
+    if (!files || files.length === 0) return;
+    const pdfList = Array.from(files).filter((f) => f.name.toLowerCase().endsWith('.pdf'));
+    if (pdfList.length === 0) {
+      setFeatureNotification({
+        type: 'error',
+        text: 'Please select valid .pdf files from your computer storage.'
+      });
+      return;
+    }
+
+    setIsUploadingLocal(true);
+    setFeatureNotification(null);
+
+    const formData = new FormData();
+    pdfList.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/upload-local-pdf`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Failed to combine uploaded local PDF files');
+      }
+
+      const data = await res.json();
+      try {
+        confetti({
+          particleCount: 75,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {}
+
+      setFeatureNotification({
+        type: 'success',
+        text: `✓ ${data.message || `Successfully combined ${pdfList.length} local PDF file(s)!`}`
+      });
+
+      // Refresh pages from server with the new merged sequence
+      fetchPages();
+
+      if (onSaveEdits) {
+        onSaveEdits(data);
+      }
+    } catch (err) {
+      setFeatureNotification({
+        type: 'error',
+        text: `Local PDF upload error: ${err.message}`
+      });
+    } finally {
+      setIsUploadingLocal(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   // PDF Features: Apply Page Numbering
   const handleApplyPageNumbers = async () => {
     setIsApplyingNumbers(true);
@@ -506,6 +576,16 @@ export default function PDFPageOrganizerModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/60 backdrop-blur-md">
       <div className="relative w-full max-w-6xl h-[92vh] bg-white border border-slate-300 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
+        {/* Hidden File Input for Local PC PDF Uploads */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={(e) => handleUploadLocalPDFs(e.target.files)}
+          accept=".pdf,application/pdf"
+          multiple
+          className="hidden"
+        />
+
         {/* Modal Top Header */}
         <div className="px-6 py-3.5 border-b border-slate-200 bg-slate-50/95 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -719,8 +799,69 @@ export default function PDFPageOrganizerModal({
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Reset</span>
                 </button>
+
+                {/* Add Local PDF from PC Button */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                  disabled={isUploadingLocal}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold transition-all shadow-sm shadow-green-600/25 active:scale-95 disabled:opacity-50"
+                  title="Add and combine PDF files from your computer storage"
+                >
+                  {isUploadingLocal ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
+                      <span>Adding PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="w-3.5 h-3.5 text-white" />
+                      <span>➕ Add PDF from PC</span>
+                    </>
+                  )}
+                </button>
               </div>
 
+            </div>
+
+            {/* Local PDF Dropzone Banner */}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragOverDropzone(true);
+              }}
+              onDragLeave={() => setIsDragOverDropzone(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragOverDropzone(false);
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                  handleUploadLocalPDFs(e.dataTransfer.files);
+                }
+              }}
+              className={`mx-6 mt-3 mb-1 p-2.5 rounded-2xl border-2 border-dashed transition-all flex flex-wrap items-center justify-between gap-3 text-xs ${
+                isDragOverDropzone
+                  ? 'border-green-500 bg-green-50 text-green-900 shadow-md scale-[1.005]'
+                  : 'border-slate-300 bg-slate-50/90 hover:bg-slate-50 text-slate-600'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-green-100 text-green-700 border border-green-200">
+                  <FolderUp className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="font-bold text-black">Combine Your Own Local PDFs:</span>
+                  <span className="ml-1 text-slate-600">Drag &amp; drop PDF files from your computer here, or click to browse and merge.</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                disabled={isUploadingLocal}
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-green-50 text-green-800 font-bold border border-green-300 shadow-xs flex items-center gap-1.5 transition-colors"
+              >
+                <Upload className="w-3.5 h-3.5 text-green-600" />
+                <span>Select Files from PC</span>
+              </button>
             </div>
 
             {/* Drag & Drop Visual Help Callout */}
@@ -744,9 +885,28 @@ export default function PDFPageOrganizerModal({
                   <p className="font-bold">Error Loading Pages</p>
                   <p>{errorMsg}</p>
                 </div>
+              ) : pages.length === 0 ? (
+                <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-8 bg-white border-2 border-dashed border-slate-300 rounded-3xl">
+                  <div className="p-4 rounded-2xl bg-green-100 text-green-700 mb-3">
+                    <FolderUp className="w-10 h-10" />
+                  </div>
+                  <h4 className="text-base font-bold text-black">No Pages In Document</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mt-1 mb-5">
+                    Add PDF files from your computer storage to combine, organize, and edit them in this visual studio.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                    disabled={isUploadingLocal}
+                    className="px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-green-600/25 active:scale-95 transition-all"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Upload &amp; Combine Local PDFs</span>
+                  </button>
+                </div>
               ) : displayedPages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 text-xs italic">
-                  No pages match the selected filter.
+                  No pages match the selected filter "{selectedFilter}".
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
