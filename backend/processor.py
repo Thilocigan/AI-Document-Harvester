@@ -1,6 +1,8 @@
 import os
 import asyncio
 import hashlib
+import re
+import urllib.parse
 from typing import List, Dict, Any, Optional
 import httpx
 import pymupdf  # PyMuPDF

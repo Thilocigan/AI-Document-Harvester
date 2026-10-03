@@ -56,11 +56,15 @@ Given any target website URL, the application autonomously scans the entire site
    - **Metadata Editor**: Update embedded Document Title, Author, and Subject.
    - **Custom Range Extraction**: Split and export custom page intervals (`e.g., 1-5, 12-18`).
 
-5. **Grounded RAG AI Assistant**:
+5. **Single Page Applications (SPAs) & Commercial Web Apps**:
+   - **Playwright Headless Browser Engine**: Automatically renders client-side SPAs (Angular, React, Vue, Next.js) with client-side hash routing (e.g. `#/main/visitgriddetails`), intercepts network PDF streams, and triggers interactive download buttons. Uses system Chrome or Edge with zero manual configuration.
+   - **1-Click Active Session Harvester**: Built-in bookmarklet and console sniffer designed specifically for OTP/login-protected portals (such as **Aarthi Scans Timeline :: USHA PUROHIT**). Extracts all diagnostic reports directly from your authenticated browser tab and streams them into the AI Harvester without re-authenticating.
+
+6. **Grounded RAG AI Assistant**:
    - Integrated semantic Q&A chatbot over the entire crawled document library.
    - Answers questions strictly grounded in the ingested PDFs with accurate source citations (`[Filename, Page #]`).
 
-6. **Refined Eye-Friendly UI**:
+7. **Refined Eye-Friendly UI**:
    - Softer grayish-white background (`#f4f6f8`) that reduces glare and eye strain.
    - High-contrast deep black typography with vibrant leaf green (`#16a34a`) action buttons and indicators.
 
@@ -92,7 +96,7 @@ flowchart TD
 |---|---|
 | **Frontend** | React 19, Vite 8, Tailwind CSS v4, Lucide Icons, Canvas-Confetti |
 | **Backend** | Python 3.10+, FastAPI, Uvicorn, Pydantic v2 |
-| **Web Crawling** | Async HTTPX, BeautifulSoup4, Brotli, Anti-bot Header Rotation |
+| **Web Crawling** | Playwright (Headless Chrome/Edge), Async HTTPX, BeautifulSoup4, Brotli |
 | **PDF Processing** | PyMuPDF (`fitz`), PyPDF, ReportLab |
 | **AI / NLP** | Google Gemini API, OpenAI API, Scikit-learn (TF-IDF Cosine Similarity) |
 | **Streaming** | Server-Sent Events (SSE) via `sse-starlette` |

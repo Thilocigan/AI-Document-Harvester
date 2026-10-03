@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Globe, ArrowRight, Compass, ShieldAlert, Sparkles, X, Check } from 'lucide-react';
+import { Globe, ArrowRight, ShieldAlert, Sparkles, X, SlidersHorizontal, Activity, Layers, KeyRound, ExternalLink } from 'lucide-react';
 
 export default function HeroSection({
   targetUrl,
   setTargetUrl,
   depthLevel,
   setDepthLevel,
+  crawlerMode,
+  setCrawlerMode,
+  authCookies,
+  setAuthCookies,
   onStartPipeline,
+  onOpenHarvesterModal,
   isLoading,
   currentStatus
 }) {
   const [urlError, setUrlError] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleStart = (e) => {
     e.preventDefault();
@@ -28,7 +34,7 @@ export default function HeroSection({
   };
 
   return (
-    <section className="relative pt-10 pb-14 overflow-hidden bg-[#f4f6f8]">
+    <section className="relative pt-10 pb-12 overflow-hidden bg-[#f4f6f8]">
       {/* Background Leaf Green Accent Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[320px] bg-green-500/10 blur-[130px] rounded-full pointer-events-none -z-10" />
 
@@ -37,7 +43,7 @@ export default function HeroSection({
         {/* Top Tag */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-50 border border-green-200 text-green-800 text-xs font-bold mb-6 tracking-wide shadow-xs">
           <Sparkles className="w-3.5 h-3.5 text-green-600 animate-pulse" />
-          <span>Autonomous AI Document Discovery &amp; Master Synthesis</span>
+          <span>Dynamic SPA &amp; Multi-Document Master Harvester</span>
         </div>
 
         {/* Hero Title */}
@@ -50,7 +56,7 @@ export default function HeroSection({
 
         {/* Subtitle */}
         <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-          Input any website domain. Our AI crawler identifies all hosted PDF documents, prunes redundant disclaimers, clusters thematic chapters, and compiles a single publication-ready master report.
+          Autonomous document crawler for standard websites, client-side Single Page Applications (Angular, React, Vue), and commercial portals. Extracts PDFs, prunes redundancy, and compiles a single publication-ready report.
         </p>
 
         {/* Main Input Form */}
@@ -65,7 +71,7 @@ export default function HeroSection({
                   type="text"
                   value={targetUrl}
                   onChange={handleUrlChange}
-                  placeholder="https://example.com or select preset below..."
+                  placeholder="https://example.com or SPA route (e.g. reports.aarthiscan.com/#/main/visitgriddetails)..."
                   disabled={isLoading}
                   className="w-full bg-transparent px-3 py-3 text-sm sm:text-base text-black placeholder-slate-400 focus:outline-none font-medium"
                 />
@@ -135,6 +141,111 @@ export default function HeroSection({
             <div className="flex items-center justify-center gap-2 mt-3 text-red-600 text-xs font-medium">
               <ShieldAlert className="w-4 h-4" />
               <span>{urlError}</span>
+            </div>
+          )}
+
+          {/* Action Row: SPA Harvester + Advanced Settings Toggle */}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+            
+            {/* 1-Click Harvester Button (Highlight for Commercial Portals like Aarthi Scans) */}
+            <button
+              type="button"
+              onClick={onOpenHarvesterModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold transition-all shadow-xs"
+            >
+              <Activity className="w-3.5 h-3.5 text-emerald-600" />
+              <span>1-Click Active Session Harvester (Aarthi Scans / Protected Portals)</span>
+            </button>
+
+            {/* Advanced SPA / Crawler Options Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-all font-medium"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+              <span>{showAdvanced ? 'Hide SPA & Crawler Settings' : 'SPA & Crawler Settings'}</span>
+            </button>
+
+          </div>
+
+          {/* Expandable Advanced SPA & Commercial Settings Box */}
+          {showAdvanced && (
+            <div className="mt-3 p-4 rounded-xl bg-white border border-slate-200 text-left shadow-sm space-y-4 animate-in fade-in duration-150">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-green-600" />
+                    Crawler Engine Mode
+                  </span>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Controls how the crawler evaluates DOM and renders client-side JavaScript applications.
+                  </p>
+                </div>
+                <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setCrawlerMode('auto')}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
+                      crawlerMode === 'auto' ? 'bg-green-600 text-white shadow-xs' : 'text-slate-600 hover:text-black'
+                    }`}
+                  >
+                    Auto-Detect
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCrawlerMode('browser')}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
+                      crawlerMode === 'browser' ? 'bg-green-600 text-white shadow-xs' : 'text-slate-600 hover:text-black'
+                    }`}
+                  >
+                    Playwright SPA
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCrawlerMode('static')}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
+                      crawlerMode === 'static' ? 'bg-green-600 text-white shadow-xs' : 'text-slate-600 hover:text-black'
+                    }`}
+                  >
+                    Static HTTP
+                  </button>
+                </div>
+              </div>
+
+              {/* Session Cookies / Auth Header Input */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Session Cookie / Auth Token (Optional for protected SPAs)</span>
+                </label>
+                <input
+                  type="text"
+                  value={authCookies}
+                  onChange={(e) => setAuthCookies(e.target.value)}
+                  placeholder="e.g. session_id=xyz; token=eyJhbGci... or Bearer token"
+                  className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-green-500"
+                />
+                <p className="text-[11px] text-slate-400">
+                  If the target SPA requires a login session to view reports, paste the cookie or authorization token here.
+                </p>
+              </div>
+
+              {/* Sample Target Portal Quick-Fill */}
+              <div className="pt-2 flex items-center gap-2 text-xs">
+                <span className="text-slate-400 font-medium">Quick load SPA example:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTargetUrl('https://reports.aarthiscan.com/reportsPortal/#/main/visitgriddetails');
+                    setCrawlerMode('browser');
+                  }}
+                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px] transition-colors"
+                >
+                  Aarthi Scans Portal (#/main/visitgriddetails)
+                </button>
+              </div>
+
             </div>
           )}
 

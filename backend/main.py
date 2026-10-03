@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env if present
 load_dotenv()
-from typing import Optional, List
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Query, UploadFile, File
+from typing import Optional, List, Dict, Any
+import re
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Query, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from sse_starlette.sse import EventSourceResponse
@@ -46,6 +47,12 @@ class PipelineRequest(BaseModel):
     gemini_api_key: Optional[str] = None
     is_demo: bool = False
     include_cover_summary: bool = False
+    crawler_mode: str = "auto"  # auto, browser, static
+    auth_cookies: Optional[str] = None
+    auth_headers: Optional[Dict[str, str]] = None
+    session_storage: Optional[Dict[str, str]] = None
+    wait_selector: Optional[str] = None
+    wait_seconds: Optional[float] = None
 
 class ChatRequest(BaseModel):
     job_id: str
@@ -57,6 +64,50 @@ class TogglePDFRequest(BaseModel):
     pdf_id: str
     selected: bool
 
+async def run_processing_and_synthesis(
+    job_id: str,
+    target_url: str,
+    openai_key: Optional[str],
+    gemini_key: Optional[str],
+    include_cover_summary: bool = False
+):
+    try:
+        # PHASE 2: Ingesting & OCR / PyMuPDF parsing
+        job = job_manager.get_job(job_id)
+        current_pdfs = job.discovered_pdfs if job else []
+        parsed_docs = await document_processor.process_all(job_id, current_pdfs)
+
+        if not parsed_docs:
+            job_manager.fail_job(job_id, "All discovered PDF files failed download or text extraction.")
+            return
+
+        # Index into RAG vector engine
+        rag_system.index_job_documents(job_id, parsed_docs)
+        job_manager.add_log(job_id, "INFO", f"Indexed {len(parsed_docs)} documents into in-memory RAG vector store.")
+
+        # PHASE 3: AI Content Analysis & Semantic De-duplication
+        analysis = await synthesizer_engine.analyze(
+            job_id,
+            parsed_docs,
+            openai_key=openai_key,
+            gemini_key=gemini_key
+        )
+
+        # PHASE 4: Master PDF Compilation & Stitching Total PDFs
+        master_path = master_merger.merge_master_pdf(
+            job_id=job_id,
+            target_url=target_url,
+            analysis=analysis,
+            pdf_list=job_manager.get_job(job_id).discovered_pdfs,
+            include_cover_summary=include_cover_summary
+        )
+
+        if not master_path:
+            job_manager.fail_job(job_id, "Compilation of Master PDF could not be completed.")
+
+    except Exception as e:
+        job_manager.fail_job(job_id, f"Unexpected pipeline exception: {str(e)}")
+
 async def run_autonomous_pipeline(
     job_id: str,
     target_url: str,
@@ -64,7 +115,13 @@ async def run_autonomous_pipeline(
     openai_key: Optional[str],
     gemini_key: Optional[str],
     is_demo: bool = False,
-    include_cover_summary: bool = False
+    include_cover_summary: bool = False,
+    crawler_mode: str = "auto",
+    auth_cookies: Optional[str] = None,
+    auth_headers: Optional[Dict[str, str]] = None,
+    session_storage: Optional[Dict[str, str]] = None,
+    wait_selector: Optional[str] = None,
+    wait_seconds: Optional[float] = None
 ):
     try:
         # Check if demo or special mock domain
@@ -102,44 +159,29 @@ async def run_autonomous_pipeline(
             await asyncio.sleep(1.0)
             job_manager.update_progress(job_id, 1, "Discovered 3 enterprise PDF assets from demo repository", 25)
         else:
-            # PHASE 1: Crawling
-            discovered_pdfs = await crawler_engine.crawl(job_id, target_url, depth_level)
+            # PHASE 1: Crawling (Dynamic Playwright SPA Engine or Static HTTP)
+            discovered_pdfs = await crawler_engine.crawl(
+                job_id=job_id,
+                target_url=target_url,
+                depth_level=depth_level,
+                crawler_mode=crawler_mode,
+                auth_cookies=auth_cookies,
+                auth_headers=auth_headers,
+                session_storage=session_storage,
+                wait_selector=wait_selector,
+                wait_seconds=wait_seconds
+            )
             if not discovered_pdfs:
-                job_manager.fail_job(job_id, f"No PDF documents were discovered on '{target_url}'. Verify the URL or select 'Entire Site' mode.")
+                job_manager.fail_job(job_id, f"No PDF documents were discovered on '{target_url}'. If this is a protected portal (e.g. medical patient records), use the 1-Click Active Session Harvester or supply session credentials.")
                 return
 
-        # PHASE 2: Ingesting & OCR / PyMuPDF parsing
-        job = job_manager.get_job(job_id)
-        current_pdfs = job.discovered_pdfs if job else []
-        parsed_docs = await document_processor.process_all(job_id, current_pdfs)
-
-        if not parsed_docs:
-            job_manager.fail_job(job_id, "All discovered PDF files failed download or text extraction.")
-            return
-
-        # Index into RAG vector engine
-        rag_system.index_job_documents(job_id, parsed_docs)
-        job_manager.add_log(job_id, "INFO", f"Indexed {len(parsed_docs)} documents into in-memory RAG vector store.")
-
-        # PHASE 3: AI Content Analysis & Semantic De-duplication
-        analysis = await synthesizer_engine.analyze(
-            job_id,
-            parsed_docs,
-            openai_key=openai_key,
-            gemini_key=gemini_key
-        )
-
-        # PHASE 4: Master PDF Compilation & Stitching Total PDFs
-        master_path = master_merger.merge_master_pdf(
+        await run_processing_and_synthesis(
             job_id=job_id,
             target_url=target_url,
-            analysis=analysis,
-            pdf_list=job_manager.get_job(job_id).discovered_pdfs,
+            openai_key=openai_key,
+            gemini_key=gemini_key,
             include_cover_summary=include_cover_summary
         )
-
-        if not master_path:
-            job_manager.fail_job(job_id, "Compilation of Master PDF could not be completed.")
 
     except Exception as e:
         job_manager.fail_job(job_id, f"Unexpected pipeline exception: {str(e)}")
@@ -155,13 +197,90 @@ async def start_pipeline(req: PipelineRequest, background_tasks: BackgroundTasks
         req.openai_api_key,
         req.gemini_api_key,
         req.is_demo,
-        req.include_cover_summary
+        req.include_cover_summary,
+        req.crawler_mode,
+        req.auth_cookies,
+        req.auth_headers,
+        req.session_storage,
+        req.wait_selector,
+        req.wait_seconds
     )
     return {
         "job_id": job.job_id,
         "status": "queued",
         "stream_url": f"/api/stream/{job.job_id}"
     }
+
+@app.post("/api/jobs/harvest-session")
+async def harvest_browser_session(
+    background_tasks: BackgroundTasks,
+    files: List[UploadFile] = File(...),
+    portal_name: Optional[str] = Form("Commercial Web Application"),
+    target_url: Optional[str] = Form("Active Browser Session"),
+    openai_api_key: Optional[str] = Form(None),
+    gemini_api_key: Optional[str] = Form(None),
+    include_cover_summary: bool = Form(False)
+):
+    """
+    1-Click Active Session Harvester Endpoint:
+    Receives PDF report files grabbed directly from an authenticated commercial SPA
+    (like Aarthi Scans USHA PUROHIT timeline) using the user's active browser session.
+    """
+    if not files:
+        raise HTTPException(status_code=400, detail="No files received in browser harvest session.")
+
+    clean_target = target_url or "Active Browser Session"
+    job = job_manager.create_job(clean_target, "single")
+    job_dir = document_processor.get_job_dir(job.job_id)
+
+    pdf_models: List[DiscoveredPDF] = []
+    for i, f in enumerate(files):
+        clean_fn = re.sub(r'[\\/*?:"<>|]', "", f.filename or f"Report_{i+1}.pdf")
+        if not clean_fn.lower().endswith(".pdf"):
+            clean_fn += ".pdf"
+        dst_path = os.path.join(job_dir, clean_fn)
+        content = await f.read()
+        if len(content) == 0:
+            continue
+        with open(dst_path, "wb") as out_f:
+            out_f.write(content)
+
+        pdf_models.append(DiscoveredPDF(
+            id=f"pdf_{i+1}",
+            url=f"{clean_target}#{clean_fn}",
+            filename=clean_fn,
+            title=clean_fn.replace(".pdf", "").replace("_", " ").title(),
+            file_size_bytes=len(content),
+            local_path=dst_path,
+            status="discovered",
+            selected=True
+        ))
+
+    if not pdf_models:
+        job_manager.fail_job(job.job_id, "No valid PDF content received from browser session.")
+        raise HTTPException(status_code=400, detail="No valid PDF content received.")
+
+    job_manager.update_pdfs(job.job_id, pdf_models)
+    job_manager.add_log(job.job_id, "SUCCESS", f"Directly harvested {len(pdf_models)} report(s) from '{portal_name}' active browser session!")
+
+    # Start background ingestion and synthesis
+    background_tasks.add_task(
+        run_processing_and_synthesis,
+        job.job_id,
+        clean_target,
+        openai_api_key,
+        gemini_api_key,
+        include_cover_summary
+    )
+
+    return {
+        "job_id": job.job_id,
+        "status": "processing",
+        "files_count": len(pdf_models),
+        "message": f"Successfully ingested {len(pdf_models)} reports from {portal_name}",
+        "stream_url": f"/api/stream/{job.job_id}"
+    }
+
 
 @app.get("/api/jobs/{job_id}")
 async def get_job_status(job_id: str):

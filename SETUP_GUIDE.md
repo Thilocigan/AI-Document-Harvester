@@ -78,8 +78,8 @@ If you prefer using the terminal (PowerShell or Command Prompt):
 
 #### 1. Setup the Backend:
 ```powershell
-# Open terminal inside the project directory
-cd d:\AI_DRIVEN_PDF_CRAWLER_SYNTHESIZER\backend
+# Open terminal inside the project directory, then navigate to backend:
+cd backend
 
 # Create virtual environment
 python -m venv venv
@@ -179,6 +179,27 @@ You can combine existing PDF files from your computer storage with web-crawled d
 2. In the Page Studio, click the green **"➕ Add PDF from PC"** button or drag-and-drop `.pdf` files directly onto the dropzone.
 3. The uploaded files are immediately parsed and appended, allowing you to drag-and-drop rearrange their pages, delete unwanted pages, rotate them, or apply watermarks and page numbering.
 4. Click **"Save & Update Merged PDF"** to produce your final unified document.
+
+---
+
+## 🌐 Step 7: Single Page Applications (SPAs) & Commercial Portals (e.g. Aarthi Scans)
+
+Modern commercial portals (such as **Aarthi Scans** `https://reports.aarthiscan.com/reportsPortal/#/main/visitgriddetails`, hospital diagnostics, ERPs, and banking systems) are built as **Single Page Applications (SPAs)** using Angular, React, or Vue with hash-routing (`#/path`) and mobile OTP/login guards.
+
+The platform provides two seamless ways to handle them:
+
+### Method 1: Automated Headless Browser Engine (Playwright)
+- The crawler automatically detects hash fragments (`#`) and SPA root tags (`<app-root>`, `<div id="root">`), launching a headless browser to render the JavaScript DOM and sniff dynamic PDF streams.
+- **Zero Browser Download Required**: Playwright automatically connects to your system's installed **Google Chrome** or **Microsoft Edge** (found on all Windows PCs).
+- In the UI under **"SPA & Crawler Settings"**, you can also provide session cookies or auth tokens to crawl protected records.
+
+### Method 2: 1-Click Active Browser Session Harvester (Best for OTP-Protected Portals)
+For medical records like **Timeline :: USHA PUROHIT**, where login requires a mobile OTP/SMS verification:
+1. Open your regular browser (Chrome or Edge) and log in to the portal as usual to view the timeline/report table.
+2. In the AI Document Harvester web app, click **"1-Click Active Session Harvester"**.
+3. Drag the **`[📑 Harvest to AI Harvester]`** bookmarklet into your browser bookmarks bar (or copy the 1-line console snippet).
+4. On the Aarthi Scans tab, click the bookmarklet.
+5. The harvester automatically grabs all diagnostic PDF reports using your already-authenticated browser session and uploads them directly to AI Document Harvester for instant merging, page reordering, and synthesis!
 
 ---
 

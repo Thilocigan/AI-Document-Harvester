@@ -56,6 +56,8 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 echo [OK] Backend dependencies installed successfully.
+echo Ensuring Playwright browser support is ready...
+venv\Scripts\python.exe -m playwright install chromium >nul 2>&1 || echo [INFO] System Google Chrome or Microsoft Edge will be used as dynamic browser engine.
 cd ..
 
 :: 4. Setup Frontend Dependencies

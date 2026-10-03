@@ -8,6 +8,7 @@ import RAGChatSidebar from './components/RAGChatSidebar';
 import PDFModal from './components/PDFModal';
 import SettingsModal from './components/SettingsModal';
 import PDFPageOrganizerModal from './components/PDFPageOrganizerModal';
+import CommercialHarvesterModal from './components/CommercialHarvesterModal';
 
 export default function App() {
   const [targetUrl, setTargetUrl] = useState('https://demo.enterprise-intelligence.org');
@@ -36,6 +37,11 @@ export default function App() {
   const [organizerTab, setOrganizerTab] = useState('layout');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [activePdfPreview, setActivePdfPreview] = useState(null);
+  const [isHarvesterModalOpen, setIsHarvesterModalOpen] = useState(false);
+
+  // SPA & Crawler Engine Settings
+  const [crawlerMode, setCrawlerMode] = useState('auto');
+  const [authCookies, setAuthCookies] = useState('');
 
   // API Keys
   const [openaiKey, setOpenaiKey] = useState(() => localStorage.getItem('openai_key') || '');
@@ -43,8 +49,26 @@ export default function App() {
 
   const eventSourceRef = useRef(null);
 
-  // Cleanup SSE on unmount
+  // Check URL query parameters (e.g., opened from Active Session Harvester bookmarklet)
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlJobId = params.get('jobId');
+    if (urlJobId) {
+      setJobId(urlJobId);
+      setIsLoading(true);
+      fetch(`/api/jobs/${urlJobId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setJobData(data);
+          if (data.status !== 'completed' && data.status !== 'failed') {
+            setupSSE(urlJobId);
+          } else {
+            setIsLoading(false);
+          }
+        })
+        .catch(() => setIsLoading(false));
+    }
+
     return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
@@ -182,7 +206,9 @@ export default function App() {
           openai_api_key: openaiKey || undefined,
           gemini_api_key: geminiKey || undefined,
           is_demo: isDemo || url.includes('demo'),
-          include_cover_summary: includeCover
+          include_cover_summary: includeCover,
+          crawler_mode: crawlerMode,
+          auth_cookies: authCookies || undefined
         })
       });
 
@@ -294,7 +320,12 @@ export default function App() {
           setTargetUrl={setTargetUrl}
           depthLevel={depthLevel}
           setDepthLevel={setDepthLevel}
+          crawlerMode={crawlerMode}
+          setCrawlerMode={setCrawlerMode}
+          authCookies={authCookies}
+          setAuthCookies={setAuthCookies}
           onStartPipeline={() => handleStartPipeline()}
+          onOpenHarvesterModal={() => setIsHarvesterModalOpen(true)}
           isLoading={isLoading}
           currentStatus={jobData.status}
         />
@@ -383,6 +414,12 @@ export default function App() {
         setOpenaiKey={setOpenaiKey}
         geminiKey={geminiKey}
         setGeminiKey={setGeminiKey}
+      />
+
+      {/* Commercial & Authenticated SPA Harvester Modal */}
+      <CommercialHarvesterModal
+        isOpen={isHarvesterModalOpen}
+        onClose={() => setIsHarvesterModalOpen(false)}
       />
 
       {/* Footer */}
