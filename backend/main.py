@@ -224,7 +224,7 @@ async def harvest_browser_session(
     """
     1-Click Active Session Harvester Endpoint:
     Receives PDF report files grabbed directly from an authenticated commercial SPA
-    (like Aarthi Scans USHA PUROHIT timeline) using the user's active browser session.
+    or secure client portal using the user's active browser session.
     """
     if not files:
         raise HTTPException(status_code=400, detail="No files received in browser harvest session.")

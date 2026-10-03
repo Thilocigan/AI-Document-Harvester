@@ -71,7 +71,7 @@ export default function HeroSection({
                   type="text"
                   value={targetUrl}
                   onChange={handleUrlChange}
-                  placeholder="https://example.com or SPA route (e.g. reports.aarthiscan.com/#/main/visitgriddetails)..."
+                  placeholder="https://example.com or SPA route (e.g. https://portal.domain.com/#/reports)..."
                   disabled={isLoading}
                   className="w-full bg-transparent px-3 py-3 text-sm sm:text-base text-black placeholder-slate-400 focus:outline-none font-medium"
                 />
@@ -147,14 +147,14 @@ export default function HeroSection({
           {/* Action Row: SPA Harvester + Advanced Settings Toggle */}
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
             
-            {/* 1-Click Harvester Button (Highlight for Commercial Portals like Aarthi Scans) */}
+            {/* 1-Click Harvester Button (Highlight for Protected Portals) */}
             <button
               type="button"
               onClick={onOpenHarvesterModal}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold transition-all shadow-xs"
             >
               <Activity className="w-3.5 h-3.5 text-emerald-600" />
-              <span>1-Click Active Session Harvester (Aarthi Scans / Protected Portals)</span>
+              <span>1-Click Active Session Harvester (Protected Portals &amp; SPAs)</span>
             </button>
 
             {/* Advanced SPA / Crawler Options Toggle */}
@@ -231,20 +231,6 @@ export default function HeroSection({
                 </p>
               </div>
 
-              {/* Sample Target Portal Quick-Fill */}
-              <div className="pt-2 flex items-center gap-2 text-xs">
-                <span className="text-slate-400 font-medium">Quick load SPA example:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTargetUrl('https://reports.aarthiscan.com/reportsPortal/#/main/visitgriddetails');
-                    setCrawlerMode('browser');
-                  }}
-                  className="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px] transition-colors"
-                >
-                  Aarthi Scans Portal (#/main/visitgriddetails)
-                </button>
-              </div>
 
             </div>
           )}

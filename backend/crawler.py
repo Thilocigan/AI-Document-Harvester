@@ -504,11 +504,11 @@ class CrawlerEngine:
                         job_id,
                         "WARNING",
                         f"Target portal redirected to Login ('{current_url}'). "
-                        "Protected commercial portals (like Aarthi Scans USHA PUROHIT timeline) require active authentication. "
+                        "Protected commercial and healthcare portals require active authentication. "
                         "Use the 1-Click 'Active Browser Session Harvester' or provide session credentials in SPA settings."
                     )
 
-                # 7. Check sessionStorage for active report URLs (used by Aarthi Scans and healthcare portals)
+                # 7. Check sessionStorage for active report URLs (used by modern SPAs and healthcare portals)
                 try:
                     active_session_pdf = await page.evaluate("() => sessionStorage.getItem('pdfURL') || sessionStorage.getItem('pdfSrc')")
                     if active_session_pdf and len(active_session_pdf) > 5:
@@ -528,7 +528,7 @@ class CrawlerEngine:
 
                 # 9. Scan for interactive report / download buttons in AG Grid, Angular, and React tables
                 try:
-                    # Specific targeting for medical / commercial portals (like Aarthi Scans desktopreportstable)
+                    # Specific targeting for medical / commercial portals (e.g. data tables, download icons)
                     report_elements = await page.query_selector_all(
                         "#desktopreportstable i.fa-download, #desktopreportstable i.fa-eye, "
                         "button, [role='button'], a[download], i.fa-download, i.fa-file-pdf, mat-icon, "
@@ -544,7 +544,7 @@ class CrawlerEngine:
                                     await btn.click(timeout=1500)
                                     await asyncio.sleep(0.8)
 
-                                    # Check if click updated sessionStorage pdfURL (Aarthi Scans pattern)
+                                    # Check if click updated sessionStorage pdfURL
                                     dyn_pdf = await page.evaluate("() => sessionStorage.getItem('pdfURL')")
                                     if dyn_pdf and dyn_pdf.startswith("http") and dyn_pdf not in discovered_pdfs_map:
                                         t_name = await page.evaluate("() => sessionStorage.getItem('TestName')") or f"Diagnostic_Report_{len(discovered_pdfs_map)+1}"

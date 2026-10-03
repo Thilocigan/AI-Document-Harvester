@@ -72,7 +72,7 @@ export default function CommercialHarvesterModal({ isOpen, onClose }) {
     const downloadIcons = Array.from(document.querySelectorAll("i.fa-download, i[title='Download'], [title*='Download' i]"));
     const eyeIcons = Array.from(document.querySelectorAll("i.fa-eye, i[title='view' i], i[title='View' i]"));
 
-    // In Aarthi Scans visit table: 1st icon set = Films, 2nd icon set = Reports (the PDF)
+    // In diagnostic visit tables: 1st icon set is often imaging/films, 2nd icon set is PDF reports
     const targetReportDownload = downloadIcons.length >= 2 ? downloadIcons[downloadIcons.length - 1] : downloadIcons[0];
     const targetReportView = eyeIcons.length >= 2 ? eyeIcons[eyeIcons.length - 1] : eyeIcons[0];
 
@@ -147,7 +147,7 @@ export default function CommercialHarvesterModal({ isOpen, onClose }) {
             </div>
             <div>
               <h2 className="text-base font-bold tracking-tight">Active Browser Session Harvester</h2>
-              <p className="text-xs text-slate-300">Instant report extraction for protected commercial SPAs (e.g. Aarthi Scans)</p>
+              <p className="text-xs text-slate-300">Instant report extraction for protected commercial SPAs &amp; portals</p>
             </div>
           </div>
           <button
@@ -167,7 +167,7 @@ export default function CommercialHarvesterModal({ isOpen, onClose }) {
             <div className="text-xs leading-relaxed text-slate-700">
               <span className="font-bold text-green-900">Why use Active Session Harvester?</span>
               <p className="mt-1">
-                Commercial web applications like <strong className="text-slate-900">Aarthi Scans (Timeline :: USHA PUROHIT)</strong>, hospital systems, and banking portals protect patient documents behind mobile OTPs and login tokens. Because you are already logged in on your browser, this tool captures your reports directly from your authenticated tab—completely bypassing OTPs, logins, and Captchas!
+                Commercial web applications (such as <strong className="text-slate-900">medical patient portals</strong>, hospital diagnostic systems, and banking dashboards) protect documents behind mobile OTPs and login tokens. Because you are already logged in on your browser, this tool captures your reports directly from your authenticated tab—completely bypassing OTPs, logins, and Captchas!
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function CommercialHarvesterModal({ isOpen, onClose }) {
                 href={bookmarkletCode}
                 onClick={(e) => {
                   e.preventDefault();
-                  alert("Drag this button to your Bookmarks Bar (Ctrl+Shift+B in Chrome/Edge to show bookmarks bar). Then click it whenever you are viewing reports on Aarthi Scans!");
+                  alert("Drag this button to your Bookmarks Bar (Ctrl+Shift+B in Chrome/Edge to show bookmarks bar). Then click it whenever you are viewing reports in your portal!");
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-xs shadow-md shadow-green-600/25 cursor-grab active:cursor-grabbing hover:from-green-500 hover:to-emerald-500 transition-all border border-green-500"
                 title="Drag to bookmarks bar"
@@ -228,7 +228,7 @@ export default function CommercialHarvesterModal({ isOpen, onClose }) {
               </button>
             </div>
             <p className="text-xs text-slate-600">
-              When viewing <strong className="text-slate-900">reports.aarthiscan.com/#/main/visitgriddetails</strong>, press <kbd className="px-1.5 py-0.5 text-[10px] bg-slate-200 rounded border border-slate-300 font-mono">F12</kbd> (or right-click → Inspect), click the <strong>Console</strong> tab, paste the code below and press <strong>Enter</strong>:
+              When viewing your protected portal or report table, press <kbd className="px-1.5 py-0.5 text-[10px] bg-slate-200 rounded border border-slate-300 font-mono">F12</kbd> (or right-click → Inspect), click the <strong>Console</strong> tab, paste the code below and press <strong>Enter</strong>:
             </p>
             <div className="relative">
               <pre className="p-3 bg-slate-900 text-green-400 rounded-xl text-[11px] font-mono overflow-x-auto max-h-24 select-all border border-slate-800">
@@ -244,7 +244,7 @@ export default function CommercialHarvesterModal({ isOpen, onClose }) {
               <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-xs">
                 <div className="w-5 h-5 rounded-full bg-green-100 text-green-700 font-bold flex items-center justify-center text-[10px]">1</div>
                 <div className="font-semibold text-slate-800">Open Protected Portal</div>
-                <div className="text-[11px] text-slate-500">Log in to Aarthi Scans and open the patient timeline (<em className="text-slate-700">USHA PUROHIT</em>).</div>
+                <div className="text-[11px] text-slate-500">Log in to your portal and open your document or report list.</div>
               </div>
               <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1 shadow-xs">
                 <div className="w-5 h-5 rounded-full bg-green-100 text-green-700 font-bold flex items-center justify-center text-[10px]">2</div>

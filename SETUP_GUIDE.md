@@ -182,9 +182,9 @@ You can combine existing PDF files from your computer storage with web-crawled d
 
 ---
 
-## 🌐 Step 7: Single Page Applications (SPAs) & Commercial Portals (e.g. Aarthi Scans)
+## 🌐 Step 7: Single Page Applications (SPAs) & Protected Commercial Portals
 
-Modern commercial portals (such as **Aarthi Scans** `https://reports.aarthiscan.com/reportsPortal/#/main/visitgriddetails`, hospital diagnostics, ERPs, and banking systems) are built as **Single Page Applications (SPAs)** using Angular, React, or Vue with hash-routing (`#/path`) and mobile OTP/login guards.
+Modern commercial web applications (such as patient portals, hospital diagnostic systems, ERPs, and banking dashboards) are built as **Single Page Applications (SPAs)** using Angular, React, or Vue with client-side hash-routing (`#/path`) and mobile OTP/login guards.
 
 The platform provides two seamless ways to handle them:
 
@@ -194,12 +194,12 @@ The platform provides two seamless ways to handle them:
 - In the UI under **"SPA & Crawler Settings"**, you can also provide session cookies or auth tokens to crawl protected records.
 
 ### Method 2: 1-Click Active Browser Session Harvester (Best for OTP-Protected Portals)
-For medical records like **Timeline :: USHA PUROHIT**, where login requires a mobile OTP/SMS verification:
-1. Open your regular browser (Chrome or Edge) and log in to the portal as usual to view the timeline/report table.
+For protected portals where login requires a mobile OTP or SMS verification:
+1. Open your regular browser (Chrome or Edge) and log in to the portal as usual to view your document or report list.
 2. In the AI Document Harvester web app, click **"1-Click Active Session Harvester"**.
 3. Drag the **`[📑 Harvest to AI Harvester]`** bookmarklet into your browser bookmarks bar (or copy the 1-line console snippet).
-4. On the Aarthi Scans tab, click the bookmarklet.
-5. The harvester automatically grabs all diagnostic PDF reports using your already-authenticated browser session and uploads them directly to AI Document Harvester for instant merging, page reordering, and synthesis!
+4. On the protected portal tab, click the bookmarklet.
+5. The harvester automatically grabs all PDF reports using your already-authenticated browser session and uploads them directly to AI Document Harvester for instant merging, page reordering, and synthesis!
 
 ---
 

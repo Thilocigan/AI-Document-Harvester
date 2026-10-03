@@ -57,8 +57,8 @@ Given any target website URL, the application autonomously scans the entire site
    - **Custom Range Extraction**: Split and export custom page intervals (`e.g., 1-5, 12-18`).
 
 5. **Single Page Applications (SPAs) & Commercial Web Apps**:
-   - **Playwright Headless Browser Engine**: Automatically renders client-side SPAs (Angular, React, Vue, Next.js) with client-side hash routing (e.g. `#/main/visitgriddetails`), intercepts network PDF streams, and triggers interactive download buttons. Uses system Chrome or Edge with zero manual configuration.
-   - **1-Click Active Session Harvester**: Built-in bookmarklet and console sniffer designed specifically for OTP/login-protected portals (such as **Aarthi Scans Timeline :: USHA PUROHIT**). Extracts all diagnostic reports directly from your authenticated browser tab and streams them into the AI Harvester without re-authenticating.
+   - **Playwright Headless Browser Engine**: Automatically renders client-side SPAs (Angular, React, Vue, Next.js) with client-side hash routing (e.g. `#/dashboard/reports`), intercepts network PDF streams, and triggers interactive download buttons. Uses system Chrome or Edge with zero manual configuration.
+   - **1-Click Active Session Harvester**: Built-in bookmarklet and console sniffer designed specifically for OTP/login-protected commercial and healthcare portals. Extracts all reports and documents directly from your authenticated browser tab and streams them into the AI Harvester without re-authenticating.
 
 6. **Grounded RAG AI Assistant**:
    - Integrated semantic Q&A chatbot over the entire crawled document library.
